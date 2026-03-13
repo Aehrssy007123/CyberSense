@@ -1,0 +1,3617 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberSense — Cyber Scam Training Platform</title>
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #070b14;
+    --bg2: #0d1525;
+    --bg3: #111c2e;
+    --surface: #141f33;
+    --surface2: #1a2744;
+    --border: rgba(99, 179, 237, 0.12);
+    --border-bright: rgba(99, 179, 237, 0.3);
+
+    --cyan: #38bdf8;
+    --cyan-dim: rgba(56, 189, 248, 0.15);
+    --cyan-glow: rgba(56, 189, 248, 0.35);
+    --green: #4ade80;
+    --green-dim: rgba(74, 222, 128, 0.12);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.12);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251, 191, 36, 0.12);
+    --orange: #fb923c;
+
+    --text-1: #e2e8f0;
+    --text-2: #94a3b8;
+    --text-3: #64748b;
+
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+
+    --radius: 8px;
+    --radius-lg: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  a { color: var(--cyan); text-decoration: none; }
+  button { cursor: pointer; font-family: var(--font-mono); }
+  input, select, textarea { font-family: var(--font-mono); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* ── PAGE WRAPPER ── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── GRID BACKGROUND ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    background: rgba(7, 11, 20, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo span { color: var(--text-1); }
+
+  .nav-links {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text-2);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--cyan-dim);
+    border-color: var(--border-bright);
+    color: var(--cyan);
+  }
+
+  .nav-wallet {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+  }
+
+  .wallet-amount { color: var(--green); font-weight: 700; }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    position: relative;
+    z-index: 1;
+    padding-top: 56px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+
+  .card:hover { border-color: var(--border-bright); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+
+  .section-sub {
+    color: var(--text-2);
+    font-size: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--bg);
+  }
+  .btn-primary:hover {
+    background: #7dd3fc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px var(--cyan-glow);
+  }
+
+  .btn-danger {
+    background: var(--red);
+    color: var(--bg);
+  }
+  .btn-danger:hover { background: #fca5a5; transform: translateY(-1px); }
+
+  .btn-success {
+    background: var(--green);
+    color: var(--bg);
+  }
+  .btn-success:hover { background: #86efac; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text-1);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--border-bright); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--border-bright);
+  }
+  .btn-outline:hover { background: var(--cyan-dim); }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+  .badge-cyan { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(56,189,248,0.2); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .progress-cyan { background: var(--cyan); }
+  .progress-green { background: var(--green); }
+  .progress-red { background: var(--red); }
+  .progress-yellow { background: var(--yellow); }
+
+  /* ── RISK METER ── */
+  .risk-meter {
+    position: relative;
+    width: 160px;
+    height: 80px;
+  }
+
+  .risk-meter svg { width: 100%; height: 100%; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    padding: 4px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--cyan);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── STAT ── */
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--text-3);
+    font-size: 11px;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes scanline { from { top: -20%; } to { top: 110%; } }
+  @keyframes glow { 0%,100% { box-shadow: 0 0 10px var(--cyan-glow); } 50% { box-shadow: 0 0 25px var(--cyan-glow), 0 0 50px rgba(56,189,248,0.15); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  .animate-in { animation: fadeIn 0.4s ease forwards; }
+  .animate-glow { animation: glow 2s ease-in-out infinite; }
+  .animate-shake { animation: shake 0.4s ease; }
+  .animate-pulse { animation: pulse 1.5s ease infinite; }
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-wrap .tip {
+    display: none;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    color: var(--text-1);
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    z-index: 200;
+  }
+  .tooltip-wrap:hover .tip { display: block; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(7,11,20,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-box {
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* ── SCAN LINE EFFECT ── */
+  .scan-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-container::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.3;
+    animation: scanline 3s linear infinite;
+  }
+
+  /* ── CYBER GRID CARD ── */
+  .cyber-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .navbar { padding: 0 1rem; }
+    .nav-links { display: none; }
+  }
+
+  /* ── DB Integration: Scenario filter buttons ── */
+  .scenario-filter-btn.active {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border-color: var(--cyan);
+  }
+
+  /* ── LANDING PAGE ── */
+  .landing-hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cyan-dim);
+    border: 1px solid rgba(56,189,248,0.25);
+    color: var(--cyan);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.5s 0.1s ease both;
+  }
+
+  .hero-title .accent { color: var(--cyan); }
+  .hero-title .line2 { display: block; color: var(--text-2); font-size: 60%; }
+
+  .hero-desc {
+    max-width: 520px;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s 0.2s ease both;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeIn 0.5s 0.3s ease both;
+  }
+
+  .hero-cta .btn { font-size: 14px; padding: 13px 28px; }
+
+  .feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 3rem;
+    animation: fadeIn 0.5s 0.4s ease both;
+  }
+
+  .feature-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .feature-pill .dot {
+    width: 6px; height: 6px;
+    background: var(--cyan);
+    border-radius: 50%;
+  }
+
+  /* ── QUIZ PAGE ── */
+  .quiz-container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    padding-top: 80px;
+  }
+
+  .quiz-header {
+    margin-bottom: 2rem;
+  }
+
+  .quiz-progress-bar {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .quiz-progress-inner {
+    height: 100%;
+    background: var(--cyan);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .quiz-category {
+    color: var(--cyan);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .quiz-question-text {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-option {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-1);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    text-align: left;
+    font-size: 13px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .quiz-option:hover {
+    border-color: var(--border-bright);
+    background: var(--surface2);
+  }
+
+  .quiz-option.selected {
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+    color: var(--cyan);
+  }
+
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* ── RESULTS PAGE ── */
+  .results-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    padding-top: 80px;
+  }
+
+  .score-hero {
+    text-align: center;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+  }
+
+  .score-number {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .score-level {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    border: 1px solid;
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .results-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── SIMULATION FEED PAGE ── */
+  .feed-page {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    min-height: 100vh;
+    padding-top: 56px;
+  }
+
+  @media (max-width: 900px) {
+    .feed-page { grid-template-columns: 1fr; }
+    .feed-sidebar { display: none; }
+  }
+
+  .feed-sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .sidebar-stat:last-child { border-bottom: none; }
+  .sidebar-stat .label { color: var(--text-2); }
+  .sidebar-stat .value { font-weight: 700; }
+
+  .feed-main {
+    padding: 1.5rem;
+    max-width: 640px;
+  }
+
+  .feed-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .feed-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .scam-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .scam-card:hover { border-color: var(--border-bright); }
+
+  .scam-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.75rem;
+    gap: 10px;
+  }
+
+  .scam-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .scam-icon { font-size: 1.4rem; }
+
+  .scam-type {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .scam-sender {
+    font-size: 12px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
+  }
+
+  .scam-time {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .scam-subject {
+    padding: 0 1rem 0.5rem;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-1);
+  }
+
+  .scam-content {
+    padding: 0 1rem 1rem;
+    font-size: 12px;
+    color: var(--text-2);
+    white-space: pre-line;
+    line-height: 1.7;
+    background: var(--bg2);
+    margin: 0 0.75rem 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 12px;
+  }
+
+  .scam-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  /* ── CHAT / EMAIL / CALL / APP SHELLS ── */
+  .chat-shell {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 0 0.75rem 0.5rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .chat-shell-sms .chat-header-bar {
+    background: rgba(15,23,42,0.9);
+  }
+
+  .chat-shell-whatsapp .chat-header-bar {
+    background: linear-gradient(90deg, #075e54, #128c7e);
+  }
+
+  .chat-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(15,23,42,0.6);
+  }
+
+  .chat-header-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chat-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .chat-title {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .chat-subtitle {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .chat-header-meta {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .chat-body {
+    padding: 10px;
+  }
+
+  .chat-body-whatsapp {
+    background: radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(15,23,42,0.9), transparent 45%);
+  }
+
+  .chat-bubble {
+    max-width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .chat-bubble.incoming {
+    background: rgba(15,23,42,0.9);
+    border: 1px solid var(--border);
+  }
+
+  .email-shell {
+    margin: 0 0.75rem 0.5rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .email-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .email-from {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .email-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(15,23,42,0.9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .email-from-name {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .email-from-meta {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .email-meta {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .email-subject-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .email-subject-text {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .email-body {
+    padding: 10px;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.7;
+  }
+
+  .email-cta-fake {
+    display: inline-block;
+    margin-top: 10px;
+    background: var(--red);
+    color: var(--bg);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .call-shell {
+    margin: 0 0.75rem 0.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: radial-gradient(circle at top, rgba(248,113,113,0.2), rgba(15,23,42,0.95));
+    padding: 14px;
+    text-align: center;
+  }
+
+  .call-status {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+
+  .call-id {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .call-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .call-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .call-number {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .call-script {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.7;
+    margin-top: 6px;
+  }
+
+  .app-shell {
+    margin: 0 0.75rem 0.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    overflow: hidden;
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .app-logo {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: #f97316;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: lowercase;
+  }
+
+  .app-title {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .app-subtitle {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .app-meta {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .app-body {
+    padding: 10px;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.7;
+  }
+
+  .app-banner {
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .app-text {
+    margin-bottom: 8px;
+  }
+
+  .app-link-fake {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-bright);
+    color: var(--cyan);
+    font-size: 11px;
+  }
+
+  .chat-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px 10px;
+    border-top: 1px solid var(--border);
+    background: rgba(15,23,42,0.9);
+  }
+
+  .chat-footer-btn {
+    border-radius: 999px;
+    border: none;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .chat-footer-btn.primary {
+    background: var(--cyan);
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .chat-footer-btn.text {
+    background: transparent;
+    color: var(--text-2);
+  }
+
+  .chat-footer-btn.text.subtle {
+    color: var(--text-3);
+  }
+
+  .chat-footer-btn:hover {
+    opacity: 0.9;
+  }
+
+  .email-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .email-link {
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--cyan);
+    font-size: 10px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  .email-link.subtle {
+    color: var(--text-3);
+  }
+
+  .email-link:hover {
+    border-color: var(--border-bright);
+  }
+
+  .call-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .call-btn {
+    border-radius: 999px;
+    border: none;
+    padding: 8px 14px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+
+  .call-btn.danger {
+    background: var(--red);
+    color: var(--bg);
+  }
+
+  .call-btn.safe {
+    background: var(--green);
+    color: var(--bg);
+  }
+
+  .call-secondary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .call-link {
+    background: none;
+    border: none;
+    color: var(--text-2);
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .app-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px 10px;
+    border-top: 1px solid var(--border);
+    background: rgba(15,23,42,0.95);
+  }
+
+  .app-footer-link {
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--cyan);
+    font-size: 10px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  .app-footer-link.subtle {
+    color: var(--text-3);
+  }
+
+  .app-footer-link:hover {
+    border-color: var(--border-bright);
+  }
+
+  .scam-action-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.15s;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  .scam-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+  .btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.25); }
+  .btn-success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .btn-success:hover:not(:disabled) { background: rgba(74,222,128,0.25); }
+  .btn-ghost { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { color: var(--text-1); border-color: var(--border-bright); }
+  .btn-outline { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+  .btn-outline:hover:not(:disabled) { color: var(--text-2); }
+
+  /* ── CONSEQUENCE MODAL ── */
+  .cm-verdict {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .cm-amount {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .cm-section-title {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 0.5rem;
+  }
+
+  .cm-red-flags {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .cm-red-flags li {
+    font-size: 12px;
+    color: var(--text-2);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── DASHBOARD PAGE ── */
+  .dashboard-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 1.5rem 2rem;
+  }
+
+  .dash-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .dash-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .dash-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 900px) {
+    .dash-grid-2 { grid-template-columns: 1fr; }
+    .dash-grid-3 { grid-template-columns: 1fr 1fr; }
+    .dash-grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .dash-grid-3 { grid-template-columns: 1fr; }
+    .dash-grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  .dash-score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .dash-score-num {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .vuln-row {
+    margin-bottom: 1rem;
+  }
+
+  .vuln-row-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 4px;
+    color: var(--text-2);
+  }
+
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .achievement-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .achievement-card.unlocked {
+    border-color: rgba(251,191,36,0.3);
+    background: rgba(251,191,36,0.05);
+  }
+
+  .achievement-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .achievement-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .achievement-desc {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  .achievement-card.locked {
+    opacity: 0.5;
+    filter: grayscale(0.7);
+  }
+
+  .leaderboard-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .leaderboard-row:last-child { border-bottom: none; }
+
+  .lb-rank {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 800;
+    width: 28px;
+    text-align: center;
+  }
+
+  .lb-rank.top { color: var(--yellow); }
+
+  .lb-user {
+    flex: 1;
+    font-size: 12px;
+  }
+
+  .lb-score {
+    font-size: 11px;
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+    </style>
+  </head>
+  <body>
+
+  <!-- Grid Background -->
+  <div class="grid-bg"></div>
+
+  <!-- ════════════════════════════════
+      NAVBAR
+  ════════════════════════════════ -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      🔐 <span>Cyber<span style="color:var(--cyan)">Sense</span></span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-page="landing">Home</button>
+      <button class="nav-btn" data-page="quiz">Assessment</button>
+      <button class="nav-btn" data-page="feed">Simulation</button>
+      <button class="nav-btn" data-page="knowledge">Knowledge Check</button>
+      <button class="nav-btn" data-page="scenarios">Scenarios</button>
+      <button class="nav-btn" data-page="dashboard">Dashboard</button>
+    </div>
+    <div class="nav-wallet" id="nav-wallet">
+      <span style="color:var(--text-3);font-size:11px;">WALLET</span>
+      <span class="wallet-amount" id="nav-wallet-amount">₹1,00,000</span>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════
+      PAGE: LANDING
+  ════════════════════════════════ -->
+  <div id="page-landing" class="page active">
+    <div class="main-content">
+      <div class="landing-hero">
+        <div class="hero-badge">
+          <span class="dot" style="width:6px;height:6px;background:var(--cyan);border-radius:50%;display:inline-block;"></span>
+          INDIA'S FIRST EXPERIENTIAL CYBER SAFETY PLATFORM
+        </div>
+
+        <h1 class="hero-title">
+          Don't just <span class="accent">learn</span> about scams.
+          <span class="line2">Experience them. Survive them.</span>
+        </h1>
+
+        <p class="hero-desc">
+          CyberSense is an immersive training platform that puts you inside real scam scenarios.
+          Make mistakes with virtual money. Learn the patterns. Build instinctive defenses that protect you for life.
+        </p>
+
+        <div class="hero-cta">
+          <button class="btn btn-primary" onclick="showPage('quiz')">
+            Take Free Assessment →
+          </button>
+          <button class="btn btn-ghost" onclick="showPage('feed')">
+            Try Simulations
+          </button>
+        </div>
+
+        <div class="feature-pills">
+          <div class="feature-pill"><span class="dot"></span> Personalized Risk Profile</div>
+          <div class="feature-pill"><span class="dot"></span> 50+ Scam Scenarios</div>
+          <div class="feature-pill"><span class="dot"></span> Virtual Financial Consequences</div>
+          <div class="feature-pill"><span class="dot"></span> India-Specific Scams</div>
+          <div class="feature-pill"><span class="dot"></span> Real-Time Progress Tracking</div>
+        </div>
+
+        <!-- Stats section -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;max-width:480px;width:100%;">
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--cyan);">₹52K</div>
+            <div class="stat-label">Avg Indian scam loss</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--yellow);">73%</div>
+            <div class="stat-label">Success rate of UPI fraud</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--green);">2 min</div>
+            <div class="stat-label">Average scam response time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div style="max-width:900px;margin:0 auto;padding:3rem 1.5rem;">
+        <h2 class="section-title" style="text-align:center;margin-bottom:0.5rem;">How CyberSense Works</h2>
+        <p class="section-sub" style="text-align:center;margin-bottom:2.5rem;">Five features that build real, lasting cyber defense</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+          <div class="cyber-card" style="padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">📋</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;">1. Profile Assessment</div>
+            <div style="color:var(--text-2);font-size:12px;line-height:1.7;">5-question quiz reveals your psychological vulnerabilities — urgency, authority, greed, trust. Your personal risk profile is built.</div>
+          </div>
+          <div class="cyber-card" style="padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">📊</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;">2. Vulnerability Results</div>
+            <div style="color:var(--text-2);font-size:12px;line-height:1.7;">See your risk score, radar chart, and top weaknesses. Understand WHY you're vulnerable before facing real scenarios.</div>
+          </div>
+          <div class="cyber-card" style="padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">📱</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;">3. Simulation Feed</div>
+            <div style="color:var(--text-2);font-size:12px;line-height:1.7;">Immersive scam feed — SMS, email, calls, WhatsApp. Make choices in real-time without knowing which are tests.</div>
+          </div>
+          <div class="cyber-card" style="padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">💥</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;">4. Consequences</div>
+            <div style="color:var(--text-2);font-size:12px;line-height:1.7;">Lose virtual money when you fall for scams. See exactly what went wrong. Emotional learning creates permanent memory.</div>
+          </div>
+          <div class="cyber-card" style="padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">📈</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:0.5rem;">5. Progress Dashboard</div>
+            <div style="color:var(--text-2);font-size:12px;line-height:1.7;">Track your risk score reduction. View wallet stats, achievements, leaderboards, and personalized insights over time.</div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:2.5rem;">
+          <button class="btn btn-primary" style="font-size:15px;padding:15px 35px;" onclick="showPage('quiz')">
+            Start Your Assessment →
+          </button>
+          <p style="color:var(--text-3);font-size:11px;margin-top:0.75rem;">5 questions · ~1 minute · No sign-up required · 100% free</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      PAGE: QUIZ
+  ════════════════════════════════ -->
+  <div id="page-quiz" class="page">
+    <div class="main-content">
+      <div class="quiz-container">
+
+        <div class="quiz-header">
+          <div class="quiz-progress-bar">
+            <div class="quiz-progress-inner" id="quiz-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="quiz-meta">
+            <span id="quiz-qnum" style="color:var(--cyan);">Q1 of 5</span>
+            <span id="quiz-progress-pct">0%</span>
+          </div>
+        </div>
+
+        <!-- Welcome card shown before quiz -->
+        <div class="card" style="margin-bottom:1.5rem;background:var(--bg2);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.4rem;">🎯</span>
+            <div>
+              <div style="font-weight:700;font-size:13px;margin-bottom:2px;">Profile Assessment</div>
+              <div style="color:var(--text-2);font-size:11px;">5 questions · ~1 minute · Reveals your cyber risk profile</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="quiz-category" style="color:var(--cyan);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;"></div>
+        <div id="quiz-question" class="quiz-question-text"></div>
+
+        <div id="quiz-options" class="quiz-options"></div>
+
+        <div class="quiz-nav">
+          <button id="quiz-back" class="btn btn-ghost" onclick="quizBack()">← Back</button>
+          <button id="quiz-next" class="btn btn-primary" onclick="quizNext()">Next →</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      PAGE: RESULTS
+  ════════════════════════════════ -->
+  <div id="page-results" class="page">
+    <div class="main-content">
+      <div class="results-container">
+
+        <h2 class="section-title">Your Risk Profile</h2>
+        <p class="section-sub">Based on your assessment answers — here's your cyber vulnerability breakdown</p>
+
+        <!-- Score Hero -->
+        <div class="score-hero">
+          <div style="color:var(--text-3);font-size:11px;letter-spacing:0.1em;margin-bottom:0.5rem;">OVERALL RISK SCORE</div>
+          <div class="score-number" id="result-score" style="color:var(--red);">72</div>
+          <div class="score-level" id="result-color" style="color:var(--red);border-color:var(--red);">
+            <span id="result-level">HIGH VULNERABILITY</span>
+          </div>
+          <p style="color:var(--text-2);font-size:12px;margin-top:0.75rem;">
+            You're at significant risk from cyber scams — but this training will change that.
+          </p>
+          <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;font-size:11px;color:var(--text-3);">
+            <span>Better than <strong style="color:var(--text-1);">34%</strong> of users</span>
+            <span>Top weakness: <strong style="color:var(--red);">Urgency</strong></span>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <!-- Radar Chart -->
+          <div class="card">
+            <div style="font-size:11px;letter-spacing:0.1em;color:var(--text-3);text-transform:uppercase;margin-bottom:0.75rem;">Vulnerability Radar</div>
+            <canvas id="results-radar" width="280" height="240" style="width:100%;max-width:280px;display:block;margin:0 auto;"></canvas>
+          </div>
+
+          <!-- Vulnerability breakdown -->
+          <div class="card">
+            <div style="font-size:11px;letter-spacing:0.1em;color:var(--text-3);text-transform:uppercase;margin-bottom:0.75rem;">Score Breakdown</div>
+            <div id="vuln-bars">
+              <div class="vuln-row">
+                <div class="vuln-row-header"><span>Urgency</span><span id="vval-urgency">0%</span></div>
+                <div class="progress-wrap"><div class="progress-fill progress-red" id="vbar-urgency" style="width:0%"></div></div>
+              </div>
+              <div class="vuln-row">
+                <div class="vuln-row-header"><span>Authority</span><span id="vval-authority">0%</span></div>
+                <div class="progress-wrap"><div class="progress-fill progress-yellow" id="vbar-authority" style="width:0%"></div></div>
+              </div>
+              <div class="vuln-row">
+                <div class="vuln-row-header"><span>Technical</span><span id="vval-technical">0%</span></div>
+                <div class="progress-wrap"><div class="progress-fill progress-yellow" id="vbar-technical" style="width:0%"></div></div>
+              </div>
+              <div class="vuln-row">
+                <div class="vuln-row-header"><span>Greed</span><span id="vval-greed">0%</span></div>
+                <div class="progress-wrap"><div class="progress-fill progress-cyan" id="vbar-greed" style="width:0%"></div></div>
+              </div>
+              <div class="vuln-row">
+                <div class="vuln-row-header"><span>Trust</span><span id="vval-trust">0%</span></div>
+                <div class="progress-wrap"><div class="progress-fill progress-cyan" id="vbar-trust" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Vulnerabilities Detail -->
+        <h3 style="font-family:var(--font-display);font-weight:700;font-size:1rem;margin-bottom:1rem;">Your Top Vulnerabilities</h3>
+        <div id="top-vulnerabilities"></div>
+
+        <!-- Training Plan Preview -->
+        <div class="card" style="margin-top:0.75rem;border-color:rgba(56,189,248,0.2);">
+          <div style="font-family:var(--font-display);font-weight:700;margin-bottom:1rem;">📋 Your Personalized Training Plan</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:12px;">
+            <div>
+              <div class="badge badge-red" style="margin-bottom:0.5rem;">PRIORITY 1</div>
+              <div style="font-weight:700;margin-bottom:0.25rem;">Urgency-Based Scams</div>
+              <div style="color:var(--text-3);">Friend emergencies, account warnings, limited-time offers</div>
+            </div>
+            <div>
+              <div class="badge badge-yellow" style="margin-bottom:0.5rem;">PRIORITY 2</div>
+              <div style="font-weight:700;margin-bottom:0.25rem;">Authority Impersonation</div>
+              <div style="color:var(--text-3);">Police scams, bank fraud calls, tax officer threats</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:12px;margin-top:1.5rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" style="flex:2;min-width:180px;" onclick="showPage('feed')">
+            Start My Training →
+          </button>
+          <button class="btn btn-ghost" onclick="showPage('dashboard');renderDashboard()">
+            View Dashboard
+          </button>
+          <button class="btn btn-outline" onclick="STATE.quizPage=0;quizAnswers=new Array(5).fill(null);renderQuiz();showPage('quiz')">
+            Retake Quiz
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      PAGE: SIMULATION FEED
+  ════════════════════════════════ -->
+  <div id="page-feed" class="page">
+    <div class="main-content feed-page">
+
+      <!-- Sidebar -->
+      <div class="feed-sidebar">
+        <div class="sidebar-title">Live Status</div>
+
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;text-align:center;">
+          <div style="color:var(--text-3);font-size:10px;letter-spacing:0.08em;margin-bottom:0.25rem;">VIRTUAL WALLET</div>
+          <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--green);" id="feed-wallet">₹1,00,000</div>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="label">Risk Score</span>
+          <span class="value" id="feed-risk" style="color:var(--red);">72/100</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="label">🔥 Streak</span>
+          <span class="value" style="color:var(--yellow);" id="feed-streak">5 days</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="label">✅ Avoided Today</span>
+          <span class="value" style="color:var(--green);" id="feed-avoided">6</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="label">❌ Trapped Today</span>
+          <span class="value" style="color:var(--red);" id="feed-trapped">2</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="sidebar-title">Skill Tree</div>
+        <div style="font-size:11px;">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-2);">UPI Defense</span>
+            <span>⭐⭐⭐⚪⚪</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-2);">Phishing Detection</span>
+            <span>⭐⭐⭐⭐⚪</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-2);">Authority Check</span>
+            <span>⭐⭐⚪⚪⚪</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;">
+            <span style="color:var(--text-2);">URL Analysis</span>
+            <span style="color:var(--green);">⭐⭐⭐⭐⭐ ✓</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="sidebar-title">This Week</div>
+        <div style="font-size:11px;color:var(--text-2);">
+          <div style="padding:4px 0;">Total scams: <strong style="color:var(--text-1);">45</strong></div>
+          <div style="padding:4px 0;">Avoided: <strong style="color:var(--green);">32</strong></div>
+          <div style="padding:4px 0;">Trapped: <strong style="color:var(--red);">13</strong></div>
+          <div style="padding:4px 0;">Success rate: <strong style="color:var(--cyan);">71%</strong></div>
+        </div>
+      </div>
+
+      <!-- Main Feed -->
+      <div class="feed-main">
+        <div class="feed-header">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+            <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;">Simulation Feed</h2>
+            <span class="badge badge-red animate-pulse">🔴 LIVE</span>
+          </div>
+          <p style="color:var(--text-2);font-size:11px;">
+            Interact with each scenario as you would in real life. You won't always know which are scams.
+          </p>
+        </div>
+
+        <div id="feed-cards" class="feed-cards"></div>
+
+        <div style="text-align:center;padding:1.5rem 0;color:var(--text-3);font-size:11px;">
+          <button class="btn btn-outline" onclick="initFeed()" style="margin-bottom:0.5rem;">
+            🔄 Load More Scenarios
+          </button>
+          <div>New threats are added from community reports and official databases</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      PAGE: DASHBOARD
+  ════════════════════════════════ -->
+  <div id="page-dashboard" class="page">
+    <div class="main-content">
+      <div class="dashboard-layout">
+
+        <div style="margin-bottom:1.5rem;">
+          <h2 class="section-title">Progress Dashboard</h2>
+          <p class="section-sub">Your complete cybersecurity training journey</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs" id="dashboard-tabs" style="margin-bottom:1.5rem;">
+          <button class="tab-btn active" data-tab="tab-overview" onclick="switchTab('dashboard-tabs','tab-overview')">Overview</button>
+          <button class="tab-btn" data-tab="tab-risk" onclick="switchTab('dashboard-tabs','tab-risk')">Risk Profile</button>
+          <button class="tab-btn" data-tab="tab-performance" onclick="switchTab('dashboard-tabs','tab-performance')">Performance</button>
+          <button class="tab-btn" data-tab="tab-wallet" onclick="switchTab('dashboard-tabs','tab-wallet')">Wallet</button>
+          <button class="tab-btn" data-tab="tab-achievements" onclick="switchTab('dashboard-tabs','tab-achievements')">Achievements</button>
+        </div>
+
+        <!-- TAB: OVERVIEW -->
+        <div id="tab-overview" class="tab-content active">
+
+          <!-- Hero stats row -->
+          <div class="dash-grid-4" style="margin-bottom:1rem;">
+            <div class="dash-score-card">
+              <div style="color:var(--text-3);font-size:10px;letter-spacing:0.08em;margin-bottom:0.5rem;">RISK SCORE</div>
+              <canvas id="dash-gauge" width="160" height="90" style="width:100%;max-width:160px;display:block;margin:0 auto;"></canvas>
+              <div class="dash-score-num" id="dash-score" style="color:var(--red);">72</div>
+              <div style="color:var(--text-3);font-size:10px;">Medium Risk</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" style="color:var(--green);" id="dash-wallet">₹47,500</div>
+              <div class="stat-label">Current Wallet</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" style="color:var(--cyan);" id="dash-total-avoided">42</div>
+              <div class="stat-label">Scams Avoided</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" style="color:var(--yellow);">🔥 <span id="dash-streak">5</span></div>
+              <div class="stat-label">Day Streak</div>
+            </div>
+          </div>
+
+          <!-- Wallet summary and score trend -->
+          <div class="dash-grid-2">
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Score History (30 days)</div>
+              <canvas id="score-history-chart" width="400" height="120" style="width:100%;display:block;"></canvas>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:0.5rem;">
+                <span>30 days ago</span>
+                <span style="color:var(--green);">↓ -18 points improvement</span>
+                <span>Today</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Wallet Summary</div>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="color:var(--text-2);font-size:12px;">Starting Balance</span>
+                  <span style="font-size:12px;color:var(--text-3);">₹1,00,000</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="color:var(--text-2);font-size:12px;">Total Lost</span>
+                  <span style="font-size:12px;color:var(--red);" id="dash-lost">-₹52,500</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="color:var(--text-2);font-size:12px;">Total Saved</span>
+                  <span style="font-size:12px;color:var(--green);" id="dash-saved">+₹85,000</span>
+                </div>
+                <div class="divider" style="margin:0.25rem 0;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-weight:700;font-size:13px;">Net Position</span>
+                  <span style="font-size:13px;font-weight:700;color:var(--green);">+₹32,500</span>
+                </div>
+                <div class="progress-wrap" style="margin-top:0.25rem;">
+                  <div class="progress-fill progress-green" style="width:47.5%"></div>
+                </div>
+                <div style="font-size:10px;color:var(--text-3);">₹47,500 remaining of ₹1,00,000</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity stats -->
+          <div class="dash-grid-3" style="margin-top:1rem;">
+            <div class="card">
+              <div style="color:var(--text-3);font-size:10px;letter-spacing:0.08em;margin-bottom:0.75rem;">TODAY</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">Scams Encountered</span>
+                <span style="font-weight:700;">8</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">✅ Avoided</span>
+                <span style="color:var(--green);font-weight:700;" id="today-avoided">6</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+                <span style="color:var(--text-2);font-size:12px;">❌ Trapped</span>
+                <span style="color:var(--red);font-weight:700;" id="today-trapped">2</span>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-fill progress-green" style="width:75%"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-3);margin-top:4px;">75% success rate</div>
+            </div>
+            <div class="card">
+              <div style="color:var(--text-3);font-size:10px;letter-spacing:0.08em;margin-bottom:0.75rem;">THIS WEEK</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">Total Scams</span>
+                <span style="font-weight:700;">45</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">✅ Avoided</span>
+                <span style="color:var(--green);font-weight:700;">32</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+                <span style="color:var(--text-2);font-size:12px;">❌ Trapped</span>
+                <span style="color:var(--red);font-weight:700;">13</span>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-fill progress-cyan" style="width:71%"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-3);margin-top:4px;">71% success rate</div>
+            </div>
+            <div class="card">
+              <div style="color:var(--text-3);font-size:10px;letter-spacing:0.08em;margin-bottom:0.75rem;">ALL TIME</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">Total Scams</span>
+                <span style="font-weight:700;">187</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="color:var(--text-2);font-size:12px;">✅ Avoided</span>
+                <span style="color:var(--green);font-weight:700;" id="dash-total-avoided2">145</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+                <span style="color:var(--text-2);font-size:12px;">Best Streak</span>
+                <span style="color:var(--yellow);font-weight:700;">🔥 7 days</span>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-fill progress-yellow" style="width:77%"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-3);margin-top:4px;">77% all-time rate</div>
+            </div>
+          </div>
+
+          <!-- Quick insights -->
+          <div class="card" style="margin-top:1rem;border-color:rgba(56,189,248,0.2);">
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:1rem;">💡 Personalized Insights</div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem;">
+                <div style="font-size:11px;color:var(--yellow);margin-bottom:3px;">⚠️ Pattern Detected</div>
+                <div style="font-size:12px;color:var(--text-2);">You fall for urgency scams 78% of the time. Try the "5-Second Rule": pause before clicking anything marked urgent.</div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem;">
+                <div style="font-size:11px;color:var(--green);margin-bottom:3px;">✅ Strength Found</div>
+                <div style="font-size:12px;color:var(--text-2);">You've mastered URL analysis (5/5 stars). Users in your age group score 60% on this — you're well above average.</div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem;">
+                <div style="font-size:11px;color:var(--cyan);margin-bottom:3px;">📚 Training Suggestion</div>
+                <div style="font-size:12px;color:var(--text-2);">Tax refund scams are surging in Pune (+300% this week). You have medium authority vulnerability. Practice recommended.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: RISK PROFILE -->
+        <div id="tab-risk" class="tab-content">
+          <div class="dash-grid-2">
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Vulnerability Radar</div>
+              <canvas id="dash-radar" width="280" height="240" style="width:100%;max-width:280px;display:block;margin:0 auto;"></canvas>
+            </div>
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Vulnerability Scores</div>
+              <div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header">
+                    <span>Urgency Susceptibility</span>
+                    <span id="dash-vuln-val-urgency" style="color:var(--red);">72%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill" id="dash-vuln-urgency" style="width:72%;background:var(--red);"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header">
+                    <span>Authority Compliance</span>
+                    <span id="dash-vuln-val-authority" style="color:var(--yellow);">65%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill" id="dash-vuln-authority" style="width:65%;background:var(--yellow);"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header">
+                    <span>Technical Naivety</span>
+                    <span id="dash-vuln-val-technical" style="color:var(--yellow);">45%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill" id="dash-vuln-technical" style="width:45%;background:var(--yellow);"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header">
+                    <span>Trust-Based Vulnerability</span>
+                    <span id="dash-vuln-val-trust" style="color:var(--cyan);">58%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill" id="dash-vuln-trust" style="width:58%;background:var(--cyan);"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header">
+                    <span>Greed Exploitation</span>
+                    <span id="dash-vuln-val-greed" style="color:var(--green);">40%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill" id="dash-vuln-greed" style="width:40%;background:var(--green);"></div></div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div style="font-size:11px;color:var(--text-3);">
+                Score weight: Urgency (30%) · Authority (25%) · Technical (20%) · Trust (15%) · Greed (10%)
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1rem;">
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:1rem;">Risk Level History</div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:0.5rem;">MONTH 1</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--red);">85</span>
+                  <span class="badge badge-red">HIGH RISK</span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:0.5rem;">MONTH 2</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--yellow);">72</span>
+                  <span class="badge badge-yellow">MEDIUM RISK</span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:0.5rem;">NOW</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--yellow);">67</span>
+                  <span class="badge badge-yellow">IMPROVING ↓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: PERFORMANCE -->
+        <div id="tab-performance" class="tab-content">
+          <div class="dash-grid-2" style="margin-bottom:1rem;">
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Scam Type Performance</div>
+              <div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header"><span>UPI / Payment Scams</span><span style="color:var(--yellow);">67%</span></div>
+                  <div class="progress-wrap"><div class="progress-fill progress-yellow" style="width:67%"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header"><span>Phishing Emails</span><span style="color:var(--green);">82%</span></div>
+                  <div class="progress-wrap"><div class="progress-fill progress-green" style="width:82%"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header"><span>Prize / Lottery</span><span style="color:var(--green);">78%</span></div>
+                  <div class="progress-wrap"><div class="progress-fill progress-green" style="width:78%"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header"><span>Authority Impersonation</span><span style="color:var(--red);">55%</span></div>
+                  <div class="progress-wrap"><div class="progress-fill progress-red" style="width:55%"></div></div>
+                </div>
+                <div class="vuln-row">
+                  <div class="vuln-row-header"><span>Job / Investment Frauds</span><span style="color:var(--cyan);">73%</span></div>
+                  <div class="progress-wrap"><div class="progress-fill progress-cyan" style="width:73%"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Monthly Loss Reduction</div>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+                    <span style="color:var(--text-2);">Month 1</span><span style="color:var(--red);">₹65,000 lost</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill progress-red" style="width:65%"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+                    <span style="color:var(--text-2);">Month 2</span><span style="color:var(--yellow);">₹28,000 lost ↓57%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill progress-yellow" style="width:28%"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+                    <span style="color:var(--text-2);">Month 3</span><span style="color:var(--green);">₹8,000 lost ↓71%</span>
+                  </div>
+                  <div class="progress-wrap"><div class="progress-fill progress-green" style="width:8%"></div></div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div style="font-size:12px;color:var(--green);font-weight:700;">📈 71% improvement in 3 months</div>
+            </div>
+          </div>
+
+          <!-- Leaderboard -->
+          <div class="card">
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:1rem;">🏆 Weekly Leaderboard</div>
+            <div class="leaderboard-row">
+              <div class="lb-rank top">1</div>
+              <div class="lb-user"><div style="font-weight:700;">Arjun S.</div><div style="color:var(--text-3);font-size:10px;">Champion</div></div>
+              <div class="lb-score">8,950 pts</div>
+            </div>
+            <div class="leaderboard-row">
+              <div class="lb-rank top">2</div>
+              <div class="lb-user"><div style="font-weight:700;">Priya K.</div><div style="color:var(--text-3);font-size:10px;">Master</div></div>
+              <div class="lb-score">7,200 pts</div>
+            </div>
+            <div class="leaderboard-row">
+              <div class="lb-rank top">3</div>
+              <div class="lb-user"><div style="font-weight:700;">Rahul M.</div><div style="color:var(--text-3);font-size:10px;">Expert</div></div>
+              <div class="lb-score">6,100 pts</div>
+            </div>
+            <div class="leaderboard-row" style="background:rgba(56,189,248,0.05);border-radius:var(--radius);padding:10px 8px;">
+              <div class="lb-rank" style="color:var(--cyan);">#237</div>
+              <div class="lb-user"><div style="font-weight:700;color:var(--cyan);">YOU</div><div style="color:var(--text-3);font-size:10px;">Bronze Defender</div></div>
+              <div class="lb-score">2,400 pts</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: WALLET -->
+        <div id="tab-wallet" class="tab-content">
+          <div class="dash-grid-2" style="margin-bottom:1rem;">
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Virtual Wallet</div>
+              <div style="text-align:center;padding:1rem 0;">
+                <div style="color:var(--text-3);font-size:10px;margin-bottom:0.25rem;">CURRENT BALANCE</div>
+                <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--green);margin-bottom:0.5rem;" id="wallet-display">₹47,500</div>
+                <div class="progress-wrap" style="height:8px;margin-bottom:0.5rem;">
+                  <div class="progress-fill progress-green" style="width:47.5%"></div>
+                </div>
+                <div style="font-size:10px;color:var(--text-3);">₹47,500 of ₹1,00,000 starting balance</div>
+              </div>
+              <div class="divider"></div>
+              <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="STATE.wallet=100000;updateNavWallet();renderDashboard();document.getElementById('wallet-display').textContent='₹1,00,000';">
+                🔄 Reset Wallet to ₹1,00,000
+              </button>
+              <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:0.5rem;">Resetting doesn't affect your progress or achievements</div>
+            </div>
+            <div class="card">
+              <div class="sidebar-title" style="margin-bottom:1rem;">Net Position</div>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div style="background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius);padding:0.75rem;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:var(--text-2);">Total Lost to Scams</span>
+                  <span style="font-family:var(--font-display);font-weight:700;color:var(--red);">-₹52,500</span>
+                </div>
+                <div style="background:var(--green-dim);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius);padding:0.75rem;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:var(--text-2);">Total Saved by Avoiding</span>
+                  <span style="font-family:var(--font-display);font-weight:700;color:var(--green);">+₹85,000</span>
+                </div>
+                <div style="background:var(--cyan-dim);border:1px solid rgba(56,189,248,0.2);border-radius:var(--radius);padding:0.75rem;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;font-weight:700;">Net Position</span>
+                  <span style="font-family:var(--font-display);font-weight:800;color:var(--cyan);">+₹32,500</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction history -->
+          <div class="card">
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:1rem;">Transaction History</div>
+            <div>
+              <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:10px;letter-spacing:0.08em;color:var(--text-3);margin-bottom:0.5rem;text-transform:uppercase;">
+                <span>Scam Type</span><span>Result</span><span>Amount</span>
+              </div>
+              <div class="divider" style="margin:0 0 0.5rem 0;"></div>
+              <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:12px;align-items:center;">
+                  <span style="color:var(--text-2);">📱 Friend Emergency UPI</span>
+                  <span class="badge badge-red">TRAPPED</span>
+                  <span style="color:var(--red);">-₹1,500</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:12px;align-items:center;">
+                  <span style="color:var(--text-2);">📧 SBI KYC Phishing Email</span>
+                  <span class="badge badge-green">AVOIDED</span>
+                  <span style="color:var(--green);">+₹25,000</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:12px;align-items:center;">
+                  <span style="color:var(--text-2);">🎉 Flipkart Prize Scam</span>
+                  <span class="badge badge-green">AVOIDED</span>
+                  <span style="color:var(--green);">+₹999</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:12px;align-items:center;">
+                  <span style="color:var(--text-2);">📦 Amazon Delivery Scam</span>
+                  <span class="badge badge-red">TRAPPED</span>
+                  <span style="color:var(--red);">-₹15,000</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;font-size:12px;align-items:center;">
+                  <span style="color:var(--text-2);">💼 WFH Job Scam</span>
+                  <span class="badge badge-green">AVOIDED</span>
+                  <span style="color:var(--green);">+₹1,499</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: ACHIEVEMENTS -->
+        <div id="tab-achievements" class="tab-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div>
+              <div style="font-family:var(--font-display);font-weight:700;">Achievements</div>
+              <div style="font-size:11px;color:var(--text-3);">12/50 unlocked · 2,400/10,000 points · Bronze Defender</div>
+            </div>
+            <div class="badge badge-yellow">BRONZE DEFENDER</div>
+          </div>
+
+          <div style="margin-bottom:0.75rem;">
+            <div class="progress-wrap" style="height:8px;">
+              <div class="progress-fill progress-yellow" style="width:24%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text-3);margin-top:4px;">3 more achievements to reach Silver Defender</div>
+          </div>
+
+          <div class="achievement-grid">
+            <div class="achievement-card unlocked">
+              <div class="achievement-icon">🛡️</div>
+              <div>
+                <div class="achievement-name">First Defense</div>
+                <div class="achievement-desc">Avoided your first scam</div>
+                <div style="color:var(--yellow);font-size:10px;margin-top:4px;">+100 pts · Mar 1</div>
+              </div>
+            </div>
+            <div class="achievement-card unlocked">
+              <div class="achievement-icon">🔥</div>
+              <div>
+                <div class="achievement-name">Week Warrior</div>
+                <div class="achievement-desc">7 days scam-free streak</div>
+                <div style="color:var(--yellow);font-size:10px;margin-top:4px;">+250 pts · Mar 7</div>
+              </div>
+            </div>
+            <div class="achievement-card unlocked">
+              <div class="achievement-icon">🔍</div>
+              <div>
+                <div class="achievement-name">URL Investigator</div>
+                <div class="achievement-desc">Mastered URL analysis (5/5)</div>
+                <div style="color:var(--yellow);font-size:10px;margin-top:4px;">+200 pts · Mar 5</div>
+              </div>
+            </div>
+            <div class="achievement-card unlocked">
+              <div class="achievement-icon">💰</div>
+              <div>
+                <div class="achievement-name">Wallet Guardian</div>
+                <div class="achievement-desc">Saved ₹50,000+ total</div>
+                <div style="color:var(--yellow);font-size:10px;margin-top:4px;">+300 pts · Mar 10</div>
+              </div>
+            </div>
+            <div class="achievement-card locked">
+              <div class="achievement-icon">💎</div>
+              <div>
+                <div class="achievement-name">Diamond Defender</div>
+                <div class="achievement-desc">30 days scam-free streak</div>
+                <div style="color:var(--text-3);font-size:10px;margin-top:4px;">14/30 days · +500 pts</div>
+              </div>
+            </div>
+            <div class="achievement-card locked">
+              <div class="achievement-icon">🧠</div>
+              <div>
+                <div class="achievement-name">Cyber Sensei</div>
+                <div class="achievement-desc">Reach Low Risk (score ≤30)</div>
+                <div style="color:var(--text-3);font-size:10px;margin-top:4px;">Current: 72 · +1000 pts</div>
+              </div>
+            </div>
+            <div class="achievement-card locked">
+              <div class="achievement-icon">📊</div>
+              <div>
+                <div class="achievement-name">Month Master</div>
+                <div class="achievement-desc">30-day engagement streak</div>
+                <div style="color:var(--text-3);font-size:10px;margin-top:4px;">14/30 days · +400 pts</div>
+              </div>
+            </div>
+            <div class="achievement-card locked">
+              <div class="achievement-icon">🏆</div>
+              <div>
+                <div class="achievement-name">Tax Season Champion</div>
+                <div class="achievement-desc">Avoid all April tax scams</div>
+                <div style="color:var(--text-3);font-size:10px;margin-top:4px;">Seasonal event · +600 pts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      CONSEQUENCE MODAL
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="consequence-modal" style="display:none;">
+    <div class="modal-box" style="max-width:500px;">
+      <div id="cm-verdict" class="cm-verdict">⚠️ YOU WERE SCAMMED</div>
+      <div id="cm-amount" class="cm-amount">- ₹0</div>
+
+      <div class="divider"></div>
+
+      <div class="cm-section-title">📌 Lesson Learned</div>
+      <p id="cm-lesson" style="font-size:12px;color:var(--text-2);margin-bottom:1rem;line-height:1.7;"></p>
+
+      <div class="cm-section-title">❌ Red Flags You Missed</div>
+      <ul id="cm-red-flags" class="cm-red-flags"></ul>
+
+      <div class="cm-section-title">🧠 Psychology Used Against You</div>
+      <div id="cm-psychology" style="margin-bottom:1.25rem;display:flex;flex-wrap:wrap;gap:4px;"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="closeConsequenceModal()">
+          Got It — Continue Training
+        </button>
+        <button class="btn btn-ghost" onclick="closeConsequenceModal();showPage('dashboard');renderDashboard();">
+          View Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ══════════════════════════════════════════════════════════════
+  //  CyberSense — Database Integration (cyber_awareness schema)
+  //  All data sourced from the MySQL database schema provided.
+  //  This file is auto-generated from the database SQL and should
+  //  not be edited manually — update the SQL source instead.
+  // ══════════════════════════════════════════════════════════════
+
+  // ── Topics (topics table) ──────────────────────────────────────
+document.addEventListener("DOMContentLoaded", function(){
+
+loadTopics()
+
+loadQuestions()
+
+loadScenarios()
+
+})
+
+  let DB_TOPICS = []
+let DB_QUESTIONS = []
+let DB_SCENARIOS = []
+async function loadTopics(){
+
+const res = await fetch("http://localhost:5000/api/topics?lang=en")
+
+DB_TOPICS = await res.json()
+
+renderTopics()
+
+}
+
+async function loadQuestions(){
+
+const res = await fetch("http://localhost:5000/api/questions?lang=en")
+
+DB_QUESTIONS = await res.json()
+
+renderDBQuizSection()
+
+}
+
+async function loadScenarios(){
+
+const res = await fetch("http://localhost:5000/api/scenarios?lang=en")
+
+DB_SCENARIOS = await res.json()
+
+renderScenarioLibrary()
+
+}
+
+
+  // ── Helpers ────────────────────────────────────────────────────
+
+  /** Return topic name label for display */
+  function getTopicLabel(topicId) {
+    const t = DB_TOPICS.find(t => t.id === topicId);
+    return t ? t.topic_name.replace(/_/g, ' ').toUpperCase() : 'SCAM';
+  }
+
+  /** Return topic icon for display */
+  function getTopicIcon(topicId) {
+    const icons = { 1: '🎮', 2: '🔗', 3: '💾', 4: '🔑', 5: '💰', 6: '🎭' };
+    return icons[topicId] || '⚠️';
+  }
+
+  /** Return difficulty label */
+  function getDifficultyLabel(d) {
+    return ['', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'][d] || 'ADVANCED';
+  }
+
+  /** Return difficulty color */
+  function getDifficultyColor(d) {
+    return ['', 'var(--green)', 'var(--yellow)', 'var(--red)'][d] || 'var(--red)';
+  }
+
+  /** Return age group display label */
+  function getAgeGroupLabel(ag) {
+    const map = {
+      under_15: 'Under 15',
+      '15_25':  '15–25',
+      '25_40':  '25–40',
+      '40_60':  '40–60',
+      '60_plus':'60+',
+    };
+    return map[ag] || ag;
+  }
+
+  </script>
+  <script>
+  // ── CyberSense Platform State ──
+  const STATE = {
+    currentPage: 'landing',
+    wallet: 100000,
+    riskScore: 72,
+    quizAnswers: {},
+    quizPage: 0,
+    vulnerabilities: { urgency: 0, authority: 0, technical: 0, greed: 0, trust: 0 },
+    streakDays: 5,
+    totalAvoided: 42,
+    totalTrapped: 11,
+    savedAmount: 85000,
+    lostAmount: 52500,
+    achievements: [],
+    dailyStats: { avoided: 6, trapped: 2 },
+  };
+
+  // ── Navigation ──
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + id);
+    if (target) {
+      target.classList.add('active');
+      STATE.currentPage = id;
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.page === id);
+    });
+    updateNavWallet();
+  }
+
+  function updateNavWallet() {
+    const el = document.getElementById('nav-wallet-amount');
+    if (el) el.textContent = '₹' + STATE.wallet.toLocaleString('en-IN');
+  }
+
+  // ── Quiz Questions ──
+  const QUIZ_QUESTIONS = [
+    {
+      category: 'Digital Behavior',
+      q: 'If an unknown number texts you about a package delivery, what do you do?',
+      options: ['Click the link immediately', 'Google the number first', 'Check courier app directly', 'Ignore it'],
+      weights: [{ technical: 20, trust: 15 }, { technical: 10 }, { technical: 0 }, {}]
+    },
+    {
+      category: 'Urgency Response',
+      q: 'A friend messages: "Phone dying, please send ₹2,000 urgent, I\'ll return it." What do you do?',
+      options: ['Send immediately', 'Send but text asking why', 'Call them on another app first', 'Ignore until verified'],
+      weights: [{ urgency: 30, trust: 20 }, { urgency: 20, trust: 10 }, { urgency: 5 }, {}]
+    },
+    {
+      category: 'Urgency Response',
+      q: 'You get a SMS: "You won ₹50,000! Pay ₹500 processing fee to claim." You:',
+      options: ['Pay the fee immediately', 'Check if it\'s real first', 'Look for official contact', 'Delete it — obvious scam'],
+      weights: [{ greed: 30, urgency: 20 }, { greed: 15, urgency: 10 }, { greed: 5 }, {}]
+    },
+    {
+      category: 'Authority & OTP',
+      q: 'Someone claiming to be from Cyber Crime Police calls, says your account is compromised and needs your OTP. You:',
+      options: ['Share OTP to protect account', 'Ask to call back on official number', 'Hang up and call bank directly', 'Demand officer ID and report number'],
+      weights: [{ authority: 35, urgency: 25 }, { authority: 15, urgency: 10 }, { authority: 5 }, { authority: 2 }]
+    },
+    {
+      category: 'Technical Awareness',
+      q: 'Which of these is a real banking URL?',
+      options: ['https://sbibank-secure.com', 'https://onlinesbi.sbi.co.in', 'http://sbi.verify-account.net', 'sbi-india.com/login'],
+      weights: [{ technical: 20 }, {}, { technical: 20 }, { technical: 20 }]
+    },
+  ];
+
+  // ── Quiz Logic ──
+  let quizAnswers = new Array(QUIZ_QUESTIONS.length).fill(null);
+
+  function renderQuiz() {
+    const q = QUIZ_QUESTIONS[STATE.quizPage];
+    const total = QUIZ_QUESTIONS.length;
+    const pct = Math.round(((STATE.quizPage) / total) * 100);
+
+    document.getElementById('quiz-progress-pct').textContent = pct + '%';
+    document.getElementById('quiz-progress-fill').style.width = pct + '%';
+    document.getElementById('quiz-qnum').textContent = `Q${STATE.quizPage + 1} of ${total}`;
+    document.getElementById('quiz-category').textContent = q.category;
+    document.getElementById('quiz-question').textContent = q.q;
+
+    const optContainer = document.getElementById('quiz-options');
+    optContainer.innerHTML = '';
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option' + (quizAnswers[STATE.quizPage] === i ? ' selected' : '');
+      btn.textContent = opt;
+      btn.onclick = () => selectOption(i);
+      optContainer.appendChild(btn);
+    });
+
+    document.getElementById('quiz-back').style.visibility = STATE.quizPage === 0 ? 'hidden' : 'visible';
+    document.getElementById('quiz-next').textContent = STATE.quizPage === total - 1 ? 'Submit Quiz →' : 'Next →';
+  }
+
+  function selectOption(idx) {
+    quizAnswers[STATE.quizPage] = idx;
+    document.querySelectorAll('.quiz-option').forEach((b, i) => {
+      b.classList.toggle('selected', i === idx);
+    });
+  }
+
+  function quizNext() {
+    if (quizAnswers[STATE.quizPage] === null) {
+      document.getElementById('quiz-options').classList.add('animate-shake');
+      setTimeout(() => document.getElementById('quiz-options').classList.remove('animate-shake'), 400);
+      return;
+    }
+    if (STATE.quizPage < QUIZ_QUESTIONS.length - 1) {
+      STATE.quizPage++;
+      renderQuiz();
+    } else {
+      calculateQuizResults();
+      showPage('results');
+    }
+  }
+
+  function quizBack() {
+    if (STATE.quizPage > 0) {
+      STATE.quizPage--;
+      renderQuiz();
+    }
+  }
+
+  function calculateQuizResults() {
+    const v = { urgency: 0, authority: 0, technical: 0, greed: 0, trust: 0 };
+    quizAnswers.forEach((ans, qi) => {
+      if (ans !== null) {
+        const w = QUIZ_QUESTIONS[qi].weights[ans];
+        Object.keys(w).forEach(k => { v[k] = (v[k] || 0) + w[k]; });
+      }
+    });
+
+    // Normalize 0–100
+    const max = { urgency: 75, authority: 55, technical: 110, greed: 30, trust: 45 };
+    Object.keys(v).forEach(k => {
+      v[k] = Math.min(100, Math.round((v[k] / (max[k] || 1)) * 100));
+    });
+
+    STATE.vulnerabilities = v;
+    STATE.riskScore = Math.min(100, Math.round(
+      v.urgency * 0.3 + v.authority * 0.25 + v.technical * 0.2 + v.trust * 0.15 + v.greed * 0.1
+    ));
+
+    renderResults();
+  }
+
+  // ── Results Rendering ──
+  function renderResults() {
+    const v = STATE.vulnerabilities;
+    const score = STATE.riskScore;
+    const scoreEl = document.getElementById('result-score');
+    const levelEl = document.getElementById('result-level');
+    const colorEl = document.getElementById('result-color');
+
+    if (scoreEl) scoreEl.textContent = score;
+
+    let level, color;
+    if (score <= 30) { level = 'CYBER AWARE'; color = 'var(--green)'; }
+    else if (score <= 60) { level = 'NEEDS TRAINING'; color = 'var(--yellow)'; }
+    else { level = 'HIGH VULNERABILITY'; color = 'var(--red)'; }
+
+    if (levelEl) levelEl.textContent = level;
+    if (colorEl) { colorEl.style.color = color; colorEl.style.borderColor = color; }
+
+    // Draw radar chart
+    drawRadarChart('results-radar', v);
+
+    // Top vulnerabilities
+    const sorted = Object.entries(v).sort((a, b) => b[1] - a[1]);
+    const vulnContainer = document.getElementById('top-vulnerabilities');
+    if (vulnContainer) {
+      vulnContainer.innerHTML = sorted.slice(0, 2).map(([key, val]) => {
+        const info = VULN_INFO[key];
+        return `
+          <div class="vuln-item card" style="margin-bottom: 0.75rem;">
+            <div class="vuln-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+              <span style="font-family:var(--font-display);font-weight:700;">${info.name}</span>
+              <span style="color:${val >= 70 ? 'var(--red)' : val >= 40 ? 'var(--yellow)' : 'var(--green)'}; font-weight:700;">${val}%</span>
+            </div>
+            <div class="progress-wrap" style="margin-bottom:0.75rem;">
+              <div class="progress-fill" style="width:${val}%; background:${val >= 70 ? 'var(--red)' : val >= 40 ? 'var(--yellow)' : 'var(--green)'}"></div>
+            </div>
+            <p style="color:var(--text-2);font-size:12px;margin-bottom:0.5rem;">${info.desc}</p>
+            <p style="color:var(--text-3);font-size:11px;">${info.example}</p>
+          </div>`;
+      }).join('');
+    }
+
+    updateNavWallet();
+  }
+
+  const VULN_INFO = {
+    urgency: {
+      name: 'URGENCY SUSCEPTIBILITY',
+      desc: 'You tend to act quickly when pressured — scammers exploit "emergency" and "limited time" tactics.',
+      example: 'Example: A friend\'s hacked account sends "Phone dying, need ₹2000 urgent" — you\'re likely to send before verifying.'
+    },
+    authority: {
+      name: 'AUTHORITY COMPLIANCE',
+      desc: 'You comply with perceived authority figures — police, bank officials, government officers.',
+      example: 'Example: "Cyber Crime Cell" calling about your account — you might share OTP to "cooperate."'
+    },
+    technical: {
+      name: 'TECHNICAL NAIVETY',
+      desc: 'Gaps in cybersecurity knowledge leave you exposed to technical manipulation.',
+      example: 'Example: Clicking a link in an email instead of going directly to the bank\'s official website.'
+    },
+    greed: {
+      name: 'GREED EXPLOITATION',
+      desc: 'You are susceptible to financial incentives — lottery, prize, and investment scams.',
+      example: 'Example: "Pay ₹500 processing fee to claim ₹50,000 prize" — FOMO overrides logic.'
+    },
+    trust: {
+      name: 'TRUST-BASED VULNERABILITY',
+      desc: 'You tend to trust unsolicited contacts, especially those impersonating people you know.',
+      example: 'Example: Trusting an unknown number claiming to be your colleague asking for help.'
+    }
+  };
+
+  // ── Radar Chart ──
+  function drawRadarChart(canvasId, data) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const R = Math.min(W, H) * 0.38;
+    const labels = ['Urgency', 'Authority', 'Technical', 'Greed', 'Trust'];
+    const keys = ['urgency', 'authority', 'technical', 'greed', 'trust'];
+    const vals = keys.map(k => (data[k] || 0) / 100);
+    const N = labels.length;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid rings
+    [0.25, 0.5, 0.75, 1].forEach(r => {
+      ctx.beginPath();
+      for (let i = 0; i < N; i++) {
+        const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + R * r * Math.cos(angle);
+        const y = cy + R * r * Math.sin(angle);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(99,179,237,0.1)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // Axis lines
+    for (let i = 0; i < N; i++) {
+      const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + R * Math.cos(angle), cy + R * Math.sin(angle));
+      ctx.strokeStyle = 'rgba(99,179,237,0.12)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Data polygon
+    ctx.beginPath();
+    vals.forEach((v, i) => {
+      const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + R * v * Math.cos(angle);
+      const y = cy + R * v * Math.sin(angle);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(248,113,113,0.2)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(248,113,113,0.8)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Data points
+    vals.forEach((v, i) => {
+      const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + R * v * Math.cos(angle);
+      const y = cy + R * v * Math.sin(angle);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#f87171';
+      ctx.fill();
+    });
+
+    // Labels
+    ctx.font = '11px "Space Mono"';
+    ctx.fillStyle = 'rgba(148,163,184,0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    labels.forEach((label, i) => {
+      const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + (R + 22) * Math.cos(angle);
+      const y = cy + (R + 22) * Math.sin(angle);
+      ctx.fillText(label, x, y);
+    });
+  }
+
+  // ── Simulation Feed ──
+  const SCAM_TEMPLATES = [
+    {
+      id: 's1', type: 'SMS', ui: 'sms', icon: '📱', difficulty: 1,
+      sender: '+91 78563 21047',
+      subject: 'Friend Emergency',
+      content: 'Bhai emergency hai. Phone low battery, please send ₹1500 urgent. I\'ll return tomorrow pakka 🙏',
+      trap: 'send',
+      actions: [
+        { label: 'Send ₹1,500', type: 'danger', outcome: 'trapped', loss: 1500, escalate: true },
+        { label: 'Call this contact', type: 'success', outcome: 'avoided', save: 1500 },
+        { label: 'Block number & report SMS', type: 'ghost', outcome: 'avoided', save: 1500 },
+        { label: 'Ignore message', type: 'outline', outcome: 'avoided', save: 0 },
+      ],
+      redFlags: ['Generic greeting "Bhai" not your name', 'Urgency + excuse (low battery)', 'Unknown number', 'No voice call despite "emergency"'],
+      psychology: ['Urgency', 'Trust (friend impersonation)', 'Loss aversion (small amount)'],
+      lesson: 'Real friends use your name. Verify via call or another channel before sending money to unknown numbers.'
+    },
+    {
+      id: 's2', type: 'Email', ui: 'email', icon: '📧', difficulty: 2,
+      sender: 'State Bank of India <no-reply@sbibank-secure.com>',
+      subject: '⚠️ URGENT: Complete KYC Update Within 24 Hours',
+      content: 'Dear Valued Customer,\n\nYour account will be temporarily frozen due to incomplete KYC verification. Please click below to update your Aadhaar details immediately to avoid service disruption.\n\n[Update KYC Now] ← RED BUTTON\n\nThis is an automated message.',
+      trap: 'click',
+      actions: [
+        { label: 'Tap "Update KYC" button', type: 'danger', outcome: 'trapped', loss: 25000 },
+        { label: 'Open official SBI app', type: 'success', outcome: 'avoided', save: 25000 },
+        { label: 'Report this as phishing', type: 'ghost', outcome: 'avoided', save: 25000 },
+        { label: 'Archive email', type: 'outline', outcome: 'avoided', save: 0 },
+      ],
+      redFlags: ['Domain: sbibank-secure.com (not sbi.co.in)', 'Generic "Valued Customer" — not your name', 'Threat of account freeze', 'Red urgent button'],
+      psychology: ['Authority (bank impersonation)', 'Urgency (24-hour deadline)', 'Fear (account freeze)'],
+      lesson: 'Real banks never ask for KYC via email links. Always go directly to the official app or website. SBI domain is onlinesbi.sbi.co.in'
+    },
+    {
+      id: 's3', type: 'SMS', ui: 'sms', icon: '🎉', difficulty: 1,
+      sender: 'FLIPKRT-OFFER',
+      subject: '🎉 Congratulations! You\'ve won ₹1,00,000',
+      content: 'CONGRATULATIONS! Your number +91 XXXXX-XX210 has been selected as the Lucky Draw Winner of ₹1,00,000 Cash Prize! Claim within 48 hours. Small processing fee ₹999. Timer: 47:23:18 remaining',
+      trap: 'pay',
+      actions: [
+        { label: 'Pay ₹999 processing fee', type: 'danger', outcome: 'trapped', loss: 999 },
+        { label: 'Tap link to view prize site', type: 'danger', outcome: 'trapped', loss: 4999 },
+        { label: 'Open Flipkart app to check', type: 'success', outcome: 'avoided', save: 999 },
+        { label: 'Mark as spam & delete', type: 'ghost', outcome: 'avoided', save: 999 },
+      ],
+      redFlags: ['No record of entering any draw', 'Pay fee to receive prize (backwards!)', 'Countdown creates fake urgency', 'Sender ID misspelled "FLIPKRT"'],
+      psychology: ['Greed (₹1 lakh prize)', 'Urgency (48-hour timer)', 'FOMO (Fear of missing out)'],
+      lesson: 'Legitimate lotteries never ask winners to pay fees. If you didn\'t enter, you can\'t win. Processing fee = scam.'
+    },
+    {
+      id: 's4', type: 'Call', ui: 'call', icon: '📞', difficulty: 3,
+      sender: 'Caller: "Cyber Crime Cell, Delhi"',
+      subject: 'Your account has been compromised',
+      content: '"Sir, I am Officer Sharma from Cyber Crime Cell. We have detected suspicious activity on your account. Your account will be blocked in 30 minutes. Share your OTP right now to help us secure your account immediately."',
+      trap: 'otp',
+      actions: [
+        { label: 'Read out the OTP on call', type: 'danger', outcome: 'trapped', loss: 45000 },
+        { label: 'Ask for badge number & ID', type: 'success', outcome: 'avoided', save: 45000 },
+        { label: 'Hang up & call bank yourself', type: 'success', outcome: 'avoided', save: 45000 },
+        { label: 'Ask them to call from official helpline', type: 'success', outcome: 'avoided', save: 45000 },
+      ],
+      redFlags: ['Police never need your OTP', 'Urgency: "30 minutes"', 'Unsolicited call about your account', 'Pressure to act before you can think'],
+      psychology: ['Authority (police impersonation)', 'Urgency (30 minute deadline)', 'Fear (account block threat)'],
+      lesson: 'Police, banks, and government agencies NEVER ask for OTPs. This is always a scam. Hang up and call the official number.'
+    },
+    {
+      id: 's5', type: 'SMS', ui: 'app', icon: '📦', difficulty: 2,
+      sender: '+91 99012 34567 (Amazon Delivery)',
+      subject: 'Your package delivery failed',
+      content: 'Amazon: Your package could not be delivered. Address unclear. Update your address within 2 hours to reschedule: https://amazon-in-delivery.track-parcel.com/update',
+      trap: 'click',
+      actions: [
+        { label: 'Tap link to update address', type: 'danger', outcome: 'trapped', loss: 15000 },
+        { label: 'Open Amazon app "Your Orders"', type: 'success', outcome: 'avoided', save: 15000 },
+        { label: 'Dismiss & ignore SMS', type: 'success', outcome: 'avoided', save: 15000 },
+        { label: 'Report SMS as phishing', type: 'ghost', outcome: 'avoided', save: 15000 },
+      ],
+      redFlags: ['URL not amazon.in or amazon.com', 'Unsolicited SMS about delivery', 'Time pressure (2 hours)', 'Real Amazon shows in app'],
+      psychology: ['Urgency (2-hour deadline)', 'Trust (brand impersonation)', 'Confusion (legitimate-sounding reason)'],
+      lesson: 'Amazon delivery issues always appear in your Amazon account/app. Never click links in SMS. Check official channels only.'
+    },
+    {
+      id: 's6', type: 'WhatsApp', ui: 'whatsapp', icon: '💬', difficulty: 2,
+      sender: 'Job Portal India (+91 80091 22334)',
+      subject: 'Work from home — ₹35,000/month guaranteed',
+      content: '🏠 WFH Opportunity!\nSalary: ₹35,000/month\nWork: 2-3 hours daily (data entry)\nRequirement: Registration fee ₹1,499 (refundable)\nSlots filling fast! Last 3 remaining today.',
+      trap: 'pay',
+      actions: [
+        { label: 'Pay ₹1,499 registration fee', type: 'danger', outcome: 'trapped', loss: 1499 },
+        { label: 'Ask for full company details', type: 'success', outcome: 'avoided', save: 1499 },
+        { label: 'Search this company on Google', type: 'success', outcome: 'avoided', save: 1499 },
+        { label: 'Block number & report spam', type: 'ghost', outcome: 'avoided', save: 1499 },
+      ],
+      redFlags: ['Registration fee for job (red flag!)', 'Unrealistic salary for easy work', '"Last 3 slots" — fake scarcity', 'Unsolicited WhatsApp message'],
+      psychology: ['Greed (high salary, easy work)', 'Scarcity (only 3 slots)', 'Urgency (filling fast)'],
+      lesson: 'Legitimate employers never charge registration fees. High salary + easy work + upfront payment = job scam. Always verify on official sites.'
+    }
+  ];
+
+  let activeFeedScams = [];
+  let currentScamIndex = 0;
+
+  function initFeed() {
+    activeFeedScams = [...SCAM_TEMPLATES].sort(() => Math.random() - 0.5);
+    currentScamIndex = 0;
+    renderFeedStats();
+    renderFeedCards();
+  }
+
+  function renderFeedStats() {
+    const walletEl = document.getElementById('feed-wallet');
+    const riskEl = document.getElementById('feed-risk');
+    const streakEl = document.getElementById('feed-streak');
+    const avoidedEl = document.getElementById('feed-avoided');
+    const trappedEl = document.getElementById('feed-trapped');
+
+    if (walletEl) walletEl.textContent = '₹' + STATE.wallet.toLocaleString('en-IN');
+    if (riskEl) riskEl.textContent = STATE.riskScore + '/100';
+    if (streakEl) streakEl.textContent = STATE.streakDays + ' days';
+    if (avoidedEl) avoidedEl.textContent = STATE.dailyStats.avoided;
+    if (trappedEl) trappedEl.textContent = STATE.dailyStats.trapped;
+  }
+
+  function renderFeedCards() {
+    const container = document.getElementById('feed-cards');
+    if (!container) return;
+    container.innerHTML = '';
+
+    activeFeedScams.forEach((scam, idx) => {
+      const card = createScamCard(scam, idx);
+      container.appendChild(card);
+    });
+  }
+
+  function createScamCard(scam, idx) {
+    const card = document.createElement('div');
+    card.className = 'scam-card animate-in';
+    card.style.animationDelay = (idx * 0.08) + 's';
+    card.dataset.scamId = scam.id;
+
+    const difficultyLabel = ['', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'][scam.difficulty] || 'ADVANCED';
+    const difficultyColor = ['', 'var(--green)', 'var(--yellow)', 'var(--red)'][scam.difficulty] || 'var(--red)';
+
+    // Decide the visual container based on UI type
+    const uiType = (scam.ui || scam.type || '').toLowerCase();
+
+    let bodyHtml = '';
+
+    if (uiType === 'sms') {
+      bodyHtml = `
+        <div class="chat-shell chat-shell-sms">
+          <div class="chat-header-bar">
+            <div class="chat-header-main">
+              <span class="chat-avatar">${scam.icon}</span>
+              <div>
+                <div class="chat-title">${scam.sender}</div>
+                <div class="chat-subtitle">${scam.subject || 'SMS message'}</div>
+              </div>
+            </div>
+            <div class="chat-header-meta">Today · 2:14 PM</div>
+          </div>
+          <div class="chat-body">
+            <div class="chat-bubble incoming">
+              ${scam.content}
+            </div>
+          </div>
+          <div class="chat-footer">
+            <button class="chat-footer-btn primary" onclick="handleScamAction('${scam.id}', 0)">Send ₹1,500</button>
+            <button class="chat-footer-btn text" onclick="handleScamAction('${scam.id}', 1)">Call this contact</button>
+            <button class="chat-footer-btn text subtle" onclick="handleScamAction('${scam.id}', 2)">Block number &amp; report</button>
+          </div>
+        </div>
+      `;
+    } else if (uiType === 'email') {
+      bodyHtml = `
+        <div class="email-shell">
+          <div class="email-header">
+            <div class="email-from">
+              <span class="email-avatar">${scam.icon}</span>
+              <div>
+                <div class="email-from-name">${scam.sender}</div>
+                <div class="email-from-meta">to you · Inbox</div>
+              </div>
+            </div>
+            <div class="email-meta">Today, 09:41</div>
+          </div>
+          <div class="email-subject-row">
+            <div class="email-subject-text">${scam.subject}</div>
+            <span class="badge badge-red">KYC ALERT</span>
+          </div>
+          <div class="email-body">
+            ${scam.content.replace(/\n/g, '<br>')}
+            <div class="email-cta-fake" onclick="handleScamAction('${scam.id}', 0)">Update KYC Now</div>
+            <div class="email-links-row">
+              <button class="email-link" onclick="handleScamAction('${scam.id}', 1)">Open official SBI app</button>
+              <button class="email-link subtle" onclick="handleScamAction('${scam.id}', 2)">Report phishing</button>
+              <button class="email-link subtle" onclick="handleScamAction('${scam.id}', 3)">Archive email</button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (uiType === 'call') {
+      bodyHtml = `
+        <div class="call-shell">
+          <div class="call-status">Incoming call…</div>
+          <div class="call-id">
+            <div class="call-avatar">${scam.icon}</div>
+            <div class="call-name">Cyber Crime Cell</div>
+            <div class="call-number">${scam.sender}</div>
+          </div>
+          <div class="call-script">
+            ${scam.content}
+          </div>
+          <div class="call-controls">
+            <button class="call-btn danger" onclick="handleScamAction('${scam.id}', 0)">Share OTP</button>
+            <button class="call-btn safe" onclick="handleScamAction('${scam.id}', 2)">End call &amp; call bank</button>
+          </div>
+          <div class="call-secondary-actions">
+            <button class="call-link" onclick="handleScamAction('${scam.id}', 1)">Ask for badge number</button>
+            <button class="call-link" onclick="handleScamAction('${scam.id}', 3)">Ask them to call from official helpline</button>
+          </div>
+        </div>
+      `;
+    } else if (uiType === 'whatsapp') {
+      bodyHtml = `
+        <div class="chat-shell chat-shell-whatsapp">
+          <div class="chat-header-bar chat-header-whatsapp">
+            <div class="chat-header-main">
+              <span class="chat-avatar">${scam.icon}</span>
+              <div>
+                <div class="chat-title">Job Portal India</div>
+                <div class="chat-subtitle">${scam.sender}</div>
+              </div>
+            </div>
+            <div class="chat-header-meta">online</div>
+          </div>
+          <div class="chat-body chat-body-whatsapp">
+            <div class="chat-bubble incoming">
+              ${scam.content.replace(/\n/g, '<br>')}
+            </div>
+          </div>
+          <div class="chat-footer">
+            <button class="chat-footer-btn primary" onclick="handleScamAction('${scam.id}', 0)">Pay registration fee</button>
+            <button class="chat-footer-btn text" onclick="handleScamAction('${scam.id}', 1)">Ask for company details</button>
+            <button class="chat-footer-btn text" onclick="handleScamAction('${scam.id}', 2)">Search on Google</button>
+            <button class="chat-footer-btn text subtle" onclick="handleScamAction('${scam.id}', 3)">Block &amp; report</button>
+          </div>
+        </div>
+      `;
+    } else if (uiType === 'app') {
+      bodyHtml = `
+        <div class="app-shell">
+          <div class="app-header">
+            <div class="app-brand">
+              <span class="app-logo">a</span>
+              <div>
+                <div class="app-title">Amazon · Delivery</div>
+                <div class="app-subtitle">Order status update</div>
+              </div>
+            </div>
+            <div class="app-meta">2 min ago</div>
+          </div>
+          <div class="app-body">
+            <div class="app-banner">${scam.subject}</div>
+            <div class="app-text">
+              ${scam.content}
+            </div>
+            <div class="app-link-fake" onclick="handleScamAction('${scam.id}', 0)">Update address</div>
+          </div>
+          <div class="app-footer-actions">
+            <button class="app-footer-link" onclick="handleScamAction('${scam.id}', 1)">Open Amazon app</button>
+            <button class="app-footer-link subtle" onclick="handleScamAction('${scam.id}', 2)">Not now</button>
+            <button class="app-footer-link subtle" onclick="handleScamAction('${scam.id}', 3)">Report SMS as phishing</button>
+          </div>
+        </div>
+      `;
+    } else {
+      // Fallback to generic card layout
+      bodyHtml = `
+        ${scam.subject ? `<div class="scam-subject">${scam.subject}</div>` : ''}
+        <div class="scam-content">${scam.content}</div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="scam-card-header">
+        <div class="scam-meta">
+          <span class="scam-icon">${scam.icon}</span>
+          <div>
+            <div class="scam-type">${scam.type}</div>
+            <div class="scam-sender">${scam.sender}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge" style="background:rgba(0,0,0,0.3);color:${difficultyColor};border:1px solid ${difficultyColor}40;font-size:9px;">${difficultyLabel}</span>
+          <span class="scam-time">2 min ago</span>
+        </div>
+      </div>
+      ${bodyHtml}
+    `;
+
+    return card;
+  }
+
+  function handleScamAction(scamId, actionIdx) {
+    const scam = SCAM_TEMPLATES.find(s => s.id === scamId);
+    if (!scam) return;
+    const action = scam.actions[actionIdx];
+    if (!action) return;
+
+    // Disable all buttons for this card
+    const actionsEl = document.getElementById('actions-' + scamId);
+    if (actionsEl) actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+    if (action.outcome === 'trapped') {
+      STATE.wallet -= action.loss;
+      STATE.dailyStats.trapped++;
+      STATE.streakDays = 0;
+      STATE.lostAmount += action.loss;
+      showConsequenceModal(scam, action, 'trapped');
+    } else {
+      if (action.save > 0) STATE.savedAmount += action.save;
+      STATE.dailyStats.avoided++;
+      if (action.save > 0) STATE.totalAvoided++;
+      showConsequenceModal(scam, action, 'avoided');
+    }
+
+    renderFeedStats();
+    updateNavWallet();
+  }
+
+  function showConsequenceModal(scam, action, outcome) {
+    const modal = document.getElementById('consequence-modal');
+    if (!modal) return;
+
+    const isTrapped = outcome === 'trapped';
+
+    document.getElementById('cm-verdict').textContent = isTrapped ? '⚠️ YOU WERE SCAMMED' : '✅ THREAT AVOIDED';
+    document.getElementById('cm-verdict').style.color = isTrapped ? 'var(--red)' : 'var(--green)';
+
+    document.getElementById('cm-amount').textContent = isTrapped
+      ? `- ₹${action.loss.toLocaleString('en-IN')} LOST`
+      : action.save > 0 ? `+ ₹${action.save.toLocaleString('en-IN')} SAVED` : 'No financial loss';
+    document.getElementById('cm-amount').style.color = isTrapped ? 'var(--red)' : 'var(--green)';
+
+    document.getElementById('cm-lesson').textContent = scam.lesson;
+
+    const redFlagsEl = document.getElementById('cm-red-flags');
+    redFlagsEl.innerHTML = scam.redFlags.map(f => `<li>❌ ${f}</li>`).join('');
+
+    const psychEl = document.getElementById('cm-psychology');
+    psychEl.innerHTML = scam.psychology.map(p => `<span class="badge badge-yellow" style="margin:2px;">${p}</span>`).join('');
+
+    modal.style.display = 'flex';
+
+    if (isTrapped) {
+      modal.querySelector('.modal-box').classList.add('animate-shake');
+      setTimeout(() => modal.querySelector('.modal-box').classList.remove('animate-shake'), 400);
+    }
+  }
+
+  function closeConsequenceModal() {
+    const modal = document.getElementById('consequence-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  // ── Dashboard ──
+  function renderDashboard() {
+    const score = STATE.riskScore;
+
+    // Risk gauge
+    drawGauge('dash-gauge', score);
+
+    // Score display
+    const scoreEl = document.getElementById('dash-score');
+    if (scoreEl) scoreEl.textContent = score;
+
+    // Wallet
+    const walletEl = document.getElementById('dash-wallet');
+    if (walletEl) walletEl.textContent = '₹' + STATE.wallet.toLocaleString('en-IN');
+
+    const savedEl = document.getElementById('dash-saved');
+    if (savedEl) savedEl.textContent = '₹' + STATE.savedAmount.toLocaleString('en-IN');
+
+    const lostEl = document.getElementById('dash-lost');
+    if (lostEl) lostEl.textContent = '₹' + STATE.lostAmount.toLocaleString('en-IN');
+
+    // Stats
+    const avoidedEl = document.getElementById('dash-total-avoided');
+    if (avoidedEl) avoidedEl.textContent = STATE.totalAvoided;
+
+    const trappedEl = document.getElementById('dash-total-trapped');
+    if (trappedEl) trappedEl.textContent = STATE.totalAvoided + STATE.dailyStats.trapped;
+
+    const streakEl = document.getElementById('dash-streak');
+    if (streakEl) streakEl.textContent = STATE.streakDays;
+
+    // Vulnerability bars
+    Object.entries(STATE.vulnerabilities).forEach(([key, val]) => {
+      const bar = document.getElementById('dash-vuln-' + key);
+      const label = document.getElementById('dash-vuln-val-' + key);
+      if (bar) bar.style.width = val + '%';
+      if (bar) bar.style.background = val >= 70 ? 'var(--red)' : val >= 40 ? 'var(--yellow)' : 'var(--green)';
+      if (label) label.textContent = val + '%';
+    });
+
+    // Radar
+    drawRadarChart('dash-radar', STATE.vulnerabilities);
+
+    // Score history chart
+    drawScoreChart();
+  }
+
+  function drawGauge(canvasId, score) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H * 0.75;
+    const R = Math.min(W, H) * 0.55;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Background arc
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, Math.PI, 0, false);
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = 'rgba(99,179,237,0.1)';
+    ctx.stroke();
+
+    // Colored arc
+    const color = score <= 30 ? '#4ade80' : score <= 60 ? '#fbbf24' : '#f87171';
+    const angle = Math.PI + (score / 100) * Math.PI;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, Math.PI, angle, false);
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Needle
+    const needleAngle = Math.PI + (score / 100) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + (R - 10) * Math.cos(needleAngle), cy + (R - 10) * Math.sin(needleAngle));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function drawScoreChart() {
+    const canvas = document.getElementById('score-history-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Simulated history
+    const history = [85, 80, 76, 78, 72, 69, 68, 72, 67, 65, STATE.riskScore];
+    const minV = 50, maxV = 100;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(99,179,237,0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = H * 0.1 + (H * 0.8 / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+
+    // Line
+    const stepX = W / (history.length - 1);
+    const scaleY = v => H * 0.1 + (H * 0.8) * ((maxV - v) / (maxV - minV));
+
+    ctx.beginPath();
+    history.forEach((v, i) => {
+      const x = i * stepX;
+      const y = scaleY(v);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = 'var(--cyan)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Fill
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(56,189,248,0.07)';
+    ctx.fill();
+
+    // Points
+    history.forEach((v, i) => {
+      const x = i * stepX;
+      const y = scaleY(v);
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = i === history.length - 1 ? 'var(--cyan)' : 'rgba(56,189,248,0.5)';
+      ctx.fill();
+    });
+  }
+
+  // ── Tabs ──
+  function switchTab(groupId, tabId) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+    group.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', () => {
+    showPage('landing');
+    renderQuiz();
+    initFeed();
+
+    // Nav buttons
+    document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pg = btn.dataset.page;
+        if (pg === 'dashboard') renderDashboard();
+        if (pg === 'feed') initFeed();
+        if (pg === 'knowledge') renderDBQuizSection();
+        if (pg === 'scenarios') renderScenarioLibrary();
+        showPage(pg);
+      });
+    });
+
+    updateNavWallet();
+
+    // ── DB Integration: render knowledge check and scenario library ──
+    renderDBQuizSection();
+    renderScenarioLibrary();
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  //  DB INTEGRATION — Knowledge Check (from DB_QUESTIONS)
+  // ════════════════════════════════════════════════════════════════
+
+  const DB_QUIZ_STATE = {
+    current: 0,
+    answers: new Array(DB_QUESTIONS.length).fill(null),
+    completed: false,
+    score: 0,
+  };
+
+  function renderDBQuizSection() {
+    const container = document.getElementById('db-quiz-container');
+    if (!container) return;
+    renderDBQuestion(container);
+  }
+
+  function renderDBQuestion(container) {
+    const q = DB_QUESTIONS[DB_QUIZ_STATE.current];
+    if (!q) return;
+
+    const topic = DB_TOPICS.find(t => t.id === q.topic_id);
+    const total = DB_QUESTIONS.length;
+    const pct = Math.round((DB_QUIZ_STATE.current / total) * 100);
+
+    container.innerHTML = `
+      <div class="card" style="margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <span class="badge badge-yellow">${getTopicIcon(q.topic_id)} ${getTopicLabel(q.topic_id)}</span>
+          <span style="font-size:11px;color:var(--text-3);">Q${DB_QUIZ_STATE.current + 1} / ${total} · Age: ${getAgeGroupLabel(q.age_group)}</span>
+        </div>
+        <div class="progress-wrap" style="margin-bottom:1rem;">
+          <div class="progress-fill" style="width:${pct}%;background:var(--cyan);"></div>
+        </div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:1rem;line-height:1.6;">${q.question_text}</div>
+        <div id="db-opts" style="display:flex;flex-direction:column;gap:8px;">
+          ${q.options.map((opt, i) => `
+            <button
+              class="quiz-option${DB_QUIZ_STATE.answers[DB_QUIZ_STATE.current] === i ? ' selected' : ''}"
+              onclick="selectDBOption(${i})"
+              style="text-align:left;">
+              <span style="color:var(--text-3);margin-right:8px;">${String.fromCharCode(65 + i)}.</span> ${opt.text}
+            </button>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;gap:8px;">
+          <button class="btn btn-ghost" onclick="dbQuizBack()" style="visibility:${DB_QUIZ_STATE.current === 0 ? 'hidden' : 'visible'};">← Back</button>
+          <button class="btn btn-primary" onclick="dbQuizNext()">
+            ${DB_QUIZ_STATE.current === total - 1 ? 'Submit →' : 'Next →'}
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function selectDBOption(idx) {
+    DB_QUIZ_STATE.answers[DB_QUIZ_STATE.current] = idx;
+    // Re-render options only to update selection highlight
+    const container = document.getElementById('db-quiz-container');
+    if (container) renderDBQuestion(container);
+  }
+
+  function dbQuizNext() {
+    const container = document.getElementById('db-quiz-container');
+    if (!container) return;
+
+    if (DB_QUIZ_STATE.answers[DB_QUIZ_STATE.current] === null) {
+      const opts = container.querySelector('#db-opts');
+      if (opts) {
+        opts.classList.add('animate-shake');
+        setTimeout(() => opts.classList.remove('animate-shake'), 400);
+      }
+      return;
+    }
+
+    if (DB_QUIZ_STATE.current < DB_QUESTIONS.length - 1) {
+      DB_QUIZ_STATE.current++;
+      renderDBQuestion(container);
+    } else {
+      // Score
+      let correct = 0;
+      DB_QUESTIONS.forEach((q, i) => {
+        // DB correct_option is 1-indexed option id; map to 0-indexed
+        if (DB_QUIZ_STATE.answers[i] === q.correct_option - 1) correct++;
+      });
+      DB_QUIZ_STATE.score = correct;
+      DB_QUIZ_STATE.completed = true;
+      renderDBQuizResults(container);
+    }
+  }
+
+  function dbQuizBack() {
+    if (DB_QUIZ_STATE.current > 0) {
+      DB_QUIZ_STATE.current--;
+      const container = document.getElementById('db-quiz-container');
+      if (container) renderDBQuestion(container);
+    }
+  }
+
+  function retakeDBQuiz() {
+    DB_QUIZ_STATE.current = 0;
+    DB_QUIZ_STATE.answers = new Array(DB_QUESTIONS.length).fill(null);
+    DB_QUIZ_STATE.completed = false;
+    DB_QUIZ_STATE.score = 0;
+    const container = document.getElementById('db-quiz-container');
+    if (container) renderDBQuestion(container);
+  }
+
+  function renderDBQuizResults(container) {
+    const total = DB_QUESTIONS.length;
+    const score = DB_QUIZ_STATE.score;
+    const pct = Math.round((score / total) * 100);
+    const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const label = pct >= 80 ? '✅ Excellent!' : pct >= 50 ? '⚠️ Needs Improvement' : '❌ High Risk';
+
+    // Build per-question review
+    const reviewHtml = DB_QUESTIONS.map((q, i) => {
+      const chosen = DB_QUIZ_STATE.answers[i];
+      const correctIdx = q.correct_option - 1;
+      const isCorrect = chosen === correctIdx;
+      return `
+        <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">${i + 1}. ${q.question_text}</div>
+          <div style="font-size:11px;color:${isCorrect ? 'var(--green)' : 'var(--red)'};">
+            ${isCorrect ? '✅' : '❌'} Your answer: <strong>${chosen !== null ? q.options[chosen].text : 'No answer'}</strong>
+          </div>
+          ${!isCorrect ? `<div style="font-size:11px;color:var(--green);margin-top:2px;">✔ Correct: <strong>${q.options[correctIdx].text}</strong></div>` : ''}
+        </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem;font-family:var(--font-display);font-weight:800;color:${color};">${score}/${total}</div>
+        <div style="color:${color};font-weight:700;margin-bottom:0.5rem;">${label}</div>
+        <div style="color:var(--text-2);font-size:12px;margin-bottom:1.25rem;">${pct}% correct on India-specific cyber awareness questions</div>
+        <div style="text-align:left;margin-bottom:1rem;">${reviewHtml}</div>
+        <button class="btn btn-primary" onclick="retakeDBQuiz()">Retake Knowledge Check</button>
+      </div>`;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  DB INTEGRATION — Real Case Scenario Library (from DB_SCENARIOS)
+  // ════════════════════════════════════════════════════════════════
+
+  const SCENARIO_PROGRESS = {}; // { scenarioId: 'success' | 'fail' | null }
+
+  function renderScenarioLibrary() {
+    const container = document.getElementById('scenario-library-cards');
+    if (!container) return;
+
+    container.innerHTML = DB_SCENARIOS.map(s => createScenarioCard(s)).join('');
+  }
+
+  function createScenarioCard(s) {
+    const topic = DB_TOPICS.find(t => t.id === s.topic_id) || {};
+    const icon  = getTopicIcon(s.topic_id);
+    const diffLabel = getDifficultyLabel(s.difficulty);
+    const diffColor = getDifficultyColor(s.difficulty);
+    const prog  = SCENARIO_PROGRESS[s.id];
+
+    const actionsHtml = s.actions.map((a, i) => {
+      const isSuccess = a.result === 'success';
+      const btnClass  = isSuccess ? 'btn-outline' : 'btn-ghost';
+      const disabled  = prog ? 'disabled' : '';
+      return `
+        <button class="btn ${btnClass}" style="margin:4px 0;width:100%;text-align:left;font-size:12px;"
+          onclick="handleScenarioAction(${s.id}, ${i})" ${disabled}>
+          ${isSuccess ? '✅' : '⚠️'} ${a.action_text}
+        </button>`;
+    }).join('');
+
+    let resultBadge = '';
+    if (prog === 'success') resultBadge = `<span class="badge badge-green" style="margin-left:6px;">✅ AVOIDED</span>`;
+    if (prog === 'fail')    resultBadge = `<span class="badge badge-red" style="margin-left:6px;">❌ TRAPPED</span>`;
+
+    return `
+      <div class="card" id="scenario-card-${s.id}" style="margin-bottom:1rem;border-left:3px solid ${diffColor};">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:0.75rem;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:1.4rem;">${icon}</span>
+            <div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:13px;">${s.title}</div>
+              <div style="color:var(--text-3);font-size:10px;margin-top:2px;">
+                ${getTopicLabel(s.topic_id)} · Age ${getAgeGroupLabel(s.age_group)}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="badge" style="background:rgba(0,0,0,0.3);color:${diffColor};border:1px solid ${diffColor}40;font-size:9px;">${diffLabel}</span>
+            ${resultBadge}
+          </div>
+        </div>
+        <p style="color:var(--text-2);font-size:12px;line-height:1.7;margin-bottom:1rem;">${s.description}</p>
+        <div style="font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">What would you do?</div>
+        <div id="scenario-actions-${s.id}">${actionsHtml}</div>
+        <div id="scenario-result-${s.id}" style="margin-top:0.75rem;"></div>
+      </div>`;
+  }
+
+  function handleScenarioAction(scenarioId, actionIdx) {
+    const scenario = DB_SCENARIOS.find(s => s.id === scenarioId);
+    if (!scenario) return;
+    const action = scenario.actions[actionIdx];
+    if (!action) return;
+
+    const isSuccess = action.result === 'success';
+    SCENARIO_PROGRESS[scenarioId] = action.result;
+
+    // Update wallet and stats
+    if (!isSuccess) {
+      STATE.wallet = Math.max(0, STATE.wallet - 10000);
+      STATE.dailyStats.trapped++;
+      STATE.lostAmount += 10000;
+    } else {
+      STATE.dailyStats.avoided++;
+      STATE.totalAvoided++;
+      STATE.savedAmount += 10000;
+    }
+    updateNavWallet();
+
+    // Show inline result
+    const resultEl = document.getElementById('scenario-result-' + scenarioId);
+    if (resultEl) {
+      const color = isSuccess ? 'var(--green)' : 'var(--red)';
+      const verdict = isSuccess ? '✅ Good call!' : '❌ You were caught!';
+      resultEl.innerHTML = `
+        <div style="padding:10px 12px;border-radius:var(--radius);background:${isSuccess ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)'};border:1px solid ${color}30;">
+          <div style="font-weight:700;color:${color};margin-bottom:4px;">${verdict}</div>
+          <div style="font-size:12px;color:var(--text-2);">${action.explanation}</div>
+        </div>`;
+    }
+
+    // Disable all action buttons for this card
+    const actionsEl = document.getElementById('scenario-actions-' + scenarioId);
+    if (actionsEl) actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+    // Refresh the badge in the card header without full re-render
+    const card = document.getElementById('scenario-card-' + scenarioId);
+    if (card) {
+      const existingBadge = card.querySelector('.badge-green, .badge-red');
+      if (!existingBadge) {
+        const headerDiv = card.querySelector('[style*="justify-content:space-between"]');
+        if (headerDiv) {
+          const badgeContainer = headerDiv.querySelector('[style*="gap:6px"]');
+          if (badgeContainer) {
+            const badge = document.createElement('span');
+            badge.className = isSuccess ? 'badge badge-green' : 'badge badge-red';
+            badge.style.marginLeft = '6px';
+            badge.textContent = isSuccess ? '✅ AVOIDED' : '❌ TRAPPED';
+            badgeContainer.appendChild(badge);
+          }
+        }
+      }
+    }
+  }
+
+  // ── Filter scenarios by age group ──
+  function filterScenariosByAge(ageGroup) {
+    document.querySelectorAll('.scenario-filter-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.age === ageGroup);
+    });
+
+    const container = document.getElementById('scenario-library-cards');
+    if (!container) return;
+
+    const filtered = ageGroup === 'all'
+      ? DB_SCENARIOS
+      : DB_SCENARIOS.filter(s => s.age_group === ageGroup);
+
+    container.innerHTML = filtered.map(s => createScenarioCard(s)).join('');
+  }
+
+  </script>
+
+  <!-- Update results bars after quiz -->
+  <script>
+  // Patch renderResults to also update individual bars on results page
+  const _origRenderResults = renderResults;
+  renderResults = function() {
+    _origRenderResults();
+    const v = STATE.vulnerabilities;
+    Object.keys(v).forEach(k => {
+      const bar = document.getElementById('vbar-' + k);
+      const val = document.getElementById('vval-' + k);
+      if (bar) {
+        bar.style.width = v[k] + '%';
+        bar.style.background = v[k] >= 70 ? 'var(--red)' : v[k] >= 40 ? 'var(--yellow)' : 'var(--green)';
+      }
+      if (val) val.textContent = v[k] + '%';
+    });
+  };
+  </script>
+
+  <!-- ════════════════════════════════
+      PAGE: KNOWLEDGE CHECK (DB Questions)
+  ════════════════════════════════ -->
+  <div id="page-knowledge" class="page">
+    <div class="main-content">
+      <div class="quiz-container">
+        <div style="margin-bottom:1.5rem;">
+          <span class="badge badge-cyan" style="margin-bottom:0.5rem;display:inline-block;">📚 DATABASE-DRIVEN</span>
+          <h2 class="section-title" style="margin-bottom:0.25rem;">India Cyber Awareness Check</h2>
+          <p class="section-sub">5 real-world questions curated from documented Indian cybercrime cases</p>
+        </div>
+        <div id="db-quiz-container">
+          <!-- Rendered by JS renderDBQuizSection() -->
+          <div class="card" style="text-align:center;padding:2rem;">
+            <div style="font-size:2rem;margin-bottom:0.75rem;">⏳</div>
+            <div style="color:var(--text-2);font-size:13px;">Loading questions…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+      PAGE: SCENARIO LIBRARY (DB Scenarios)
+  ════════════════════════════════ -->
+  <div id="page-scenarios" class="page">
+    <div class="main-content">
+      <div style="max-width:720px;margin:0 auto;">
+
+        <div style="margin-bottom:1.5rem;">
+          <span class="badge badge-yellow" style="margin-bottom:0.5rem;display:inline-block;">📁 REAL CASES · DATABASE-DRIVEN</span>
+          <h2 class="section-title" style="margin-bottom:0.25rem;">Real Case Scenario Library</h2>
+          <p class="section-sub">10 documented Indian cybercrime incidents — read, understand, and choose the right response</p>
+        </div>
+
+        <!-- Age Group Filter -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem;">
+          <button class="btn btn-ghost scenario-filter-btn active" data-age="all" onclick="filterScenariosByAge('all')" style="font-size:11px;padding:6px 12px;">All Ages</button>
+          <button class="btn btn-ghost scenario-filter-btn" data-age="under_15" onclick="filterScenariosByAge('under_15')" style="font-size:11px;padding:6px 12px;">Under 15</button>
+          <button class="btn btn-ghost scenario-filter-btn" data-age="15_25" onclick="filterScenariosByAge('15_25')" style="font-size:11px;padding:6px 12px;">15–25</button>
+          <button class="btn btn-ghost scenario-filter-btn" data-age="25_40" onclick="filterScenariosByAge('25_40')" style="font-size:11px;padding:6px 12px;">25–40</button>
+          <button class="btn btn-ghost scenario-filter-btn" data-age="40_60" onclick="filterScenariosByAge('40_60')" style="font-size:11px;padding:6px 12px;">40–60</button>
+          <button class="btn btn-ghost scenario-filter-btn" data-age="60_plus" onclick="filterScenariosByAge('60_plus')" style="font-size:11px;padding:6px 12px;">60+</button>
+        </div>
+
+        <!-- Stats bar -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--cyan);">10</div>
+            <div class="stat-label">Real Cases</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--yellow);">6</div>
+            <div class="stat-label">Scam Topics</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--green);">5</div>
+            <div class="stat-label">Age Groups</div>
+          </div>
+        </div>
+
+        <div id="scenario-library-cards">
+          <!-- Rendered by renderScenarioLibrary() -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  </body>
+  </html>
