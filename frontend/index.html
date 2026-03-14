@@ -40,7 +40,7 @@
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0px; padding: 0; }
 
   html { scroll-behavior: smooth; }
 
@@ -724,8 +724,8 @@
   .sidebar-stat .value { font-weight: 700; }
 
   .feed-main {
-    padding: 1.5rem;
-    max-width: 640px;
+    max-width: 1000px;
+    overflow-y: auto;
   }
 
   .feed-header {
@@ -733,9 +733,9 @@
   }
 
   .feed-cards {
-    display: flex;
+    display: block;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem
   }
 
   .scam-card {
@@ -2314,10 +2314,6 @@
 
   <script>
   // ══════════════════════════════════════════════════════════════
-  //  CyberSense — Database Integration (cyber_awareness schema)
-  //  All data sourced from the MySQL database schema provided.
-  //  This file is auto-generated from the database SQL and should
-  //  not be edited manually — update the SQL source instead.
   // ══════════════════════════════════════════════════════════════
 
   // ── Topics (topics table) ──────────────────────────────────────
